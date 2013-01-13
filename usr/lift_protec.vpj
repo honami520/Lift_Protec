@@ -1,0 +1,340 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+	Version="10.0"
+	VendorName="SlickEdit"
+	TemplateName="GNU C/C++"
+	WorkingDir="."
+	BuildSystem="vsbuild">
+	<Config
+		Name="Debug"
+		Type="gnuc"
+		DebugCallbackName="gdb"
+		Version="1"
+		OutputFile="%bdlift_protec"
+		CompilerConfigName="Latest Version">
+		<Menu>
+			<Target
+				Name="Compile"
+				MenuCaption="&amp;Compile"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				OutputExts="*.o"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc -c %xup  %defd -g -o "%bd%n%oe" %i "%f"'/>
+			</Target>
+			<Target
+				Name="Link"
+				MenuCaption="&amp;Link"
+				ShowOnMenu="Never"
+				Dialog="_gnuc_options_form Link"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc %xup -g -o "%o" %f %libs'/>
+			</Target>
+			<Target
+				Name="Build"
+				MenuCaption="&amp;Build"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t build'/>
+			</Target>
+			<Target
+				Name="Rebuild"
+				MenuCaption="&amp;Rebuild"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t rebuild'/>
+			</Target>
+			<Target
+				Name="Debug"
+				MenuCaption="&amp;Debug"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec CmdLine='vsdebugio -prog "%o"'/>
+			</Target>
+			<Target
+				Name="Execute"
+				MenuCaption="E&amp;xecute"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%o"'/>
+			</Target>
+			<Target
+				Name="dash"
+				MenuCaption="-"
+				Deletable="0">
+				<Exec/>
+			</Target>
+			<Target
+				Name="GNU C Options"
+				MenuCaption="GNU C &amp;Options..."
+				ShowOnMenu="HideIfNoCmdLine"
+				Deletable="0"
+				SaveOption="SaveNone">
+				<Exec
+					CmdLine="gnucoptions"
+					Type="Slick-C"/>
+			</Target>
+		</Menu>
+		<List Name="GNUC Options">
+			<Item
+				Name="LinkerOutputType"
+				Value="Executable"/>
+		</List>
+	</Config>
+	<Config
+		Name="Release"
+		Type="gnuc"
+		DebugCallbackName="gdb"
+		Version="1"
+		OutputFile="%bdlift_protec"
+		CompilerConfigName="Latest Version">
+		<Menu>
+			<Target
+				Name="Compile"
+				MenuCaption="&amp;Compile"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				OutputExts="*.o"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc -c %xup %defd -o "%bd%n%oe" %i "%f"'/>
+			</Target>
+			<Target
+				Name="Link"
+				MenuCaption="&amp;Link"
+				ShowOnMenu="Never"
+				Dialog="_gnuc_options_form Link"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc %xup -o "%o" %f %libs'/>
+			</Target>
+			<Target
+				Name="Build"
+				MenuCaption="&amp;Build"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t build'/>
+			</Target>
+			<Target
+				Name="Rebuild"
+				MenuCaption="&amp;Rebuild"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t rebuild'/>
+			</Target>
+			<Target
+				Name="Debug"
+				MenuCaption="&amp;Debug"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec CmdLine='vsdebugio -prog "%o"'/>
+			</Target>
+			<Target
+				Name="Execute"
+				MenuCaption="E&amp;xecute"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%o"'/>
+			</Target>
+			<Target
+				Name="dash"
+				MenuCaption="-"
+				Deletable="0">
+				<Exec/>
+			</Target>
+			<Target
+				Name="GNU C Options"
+				MenuCaption="GNU C &amp;Options..."
+				ShowOnMenu="HideIfNoCmdLine"
+				Deletable="0"
+				SaveOption="SaveNone">
+				<Exec
+					CmdLine="gnucoptions"
+					Type="Slick-C"/>
+			</Target>
+		</Menu>
+		<List Name="GNUC Options">
+			<Item
+				Name="LinkerOutputType"
+				Value="Executable"/>
+		</List>
+	</Config>
+	<Files>
+		<Folder
+			Name="Source Files"
+			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm">
+			<F N="crc16.c"/>
+			<F N="eeprom.c"/>
+			<F N="../MDK-ARM/hot-foot/eeprom.d"/>
+			<F N="flash_eep.c"/>
+			<F N="../MDK-ARM/hot-foot/flash_eep.d"/>
+			<F N="led.c"/>
+			<F N="main.c"/>
+			<F N="../MDK-ARM/hot-foot/main.d"/>
+			<F N="misc.c"/>
+			<F N="mma8451.c"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Release_Notes.html"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/Release_Notes.html"/>
+			<F N="../MDK-ARM/hot-foot/startup_stm32f0xx.d"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/arm/startup_stm32f0xx.s"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/gcc_ride7/startup_stm32f0xx.s"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/iar/startup_stm32f0xx.s"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/TrueSTUDIO/startup_stm32f0xx.s"/>
+			<F N="stm32f0xx_it.c"/>
+			<F N="../MDK-ARM/hot-foot/stm32f0xx_it.d"/>
+			<F N="system_stm32f0xx.c"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/system_stm32f0xx.c"/>
+			<F N="../MDK-ARM/hot-foot/system_stm32f0xx.d"/>
+			<F N="tm1640.c"/>
+			<F N="../MDK-ARM/hot-foot/tm1640.d"/>
+			<F N="uart.c"/>
+		</Folder>
+		<Folder
+			Name="Header Files"
+			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+			<F N="../Libraries/CMSIS/Include/arm_common_tables.h"/>
+			<F N="../Libraries/CMSIS/Include/arm_math.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cm0.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cm3.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cm4.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cm4_simd.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cmFunc.h"/>
+			<F N="../Libraries/CMSIS/Include/core_cmInstr.h"/>
+			<F N="crc16.h"/>
+			<F N="eeprom.h"/>
+			<F N="flash_eep.h"/>
+			<F N="led.h"/>
+			<F N="main.h"/>
+			<F N="misc.h"/>
+			<F N="mma8451.h"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Include/stm32f0xx.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_adc.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_cec.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_comp.h"/>
+			<F N="stm32f0xx_conf.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_crc.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_dac.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_dbgmcu.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_dma.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_exti.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_flash.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_gpio.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_i2c.h"/>
+			<F N="stm32f0xx_it.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_iwdg.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_misc.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_pwr.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_rcc.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_rtc.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_spi.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_syscfg.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_tim.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_usart.h"/>
+			<F N="../Libraries/STM32F0xx_StdPeriph_Driver/inc/stm32f0xx_wwdg.h"/>
+			<F N="../Libraries/CMSIS/Device/ST/STM32F0xx/Include/system_stm32f0xx.h"/>
+			<F N="tm1640.h"/>
+			<F N="uart.h"/>
+		</Folder>
+		<Folder
+			Name="Resource Files"
+			Filters="*.ico;*.cur;*.dlg"/>
+		<Folder
+			Name="Bitmaps"
+			Filters="*.bmp"/>
+		<Folder
+			Name="Other Files"
+			Filters="">
+			<F N="../Libraries/CMSIS/CMSIS END USER LICENCE AGREEMENT.pdf"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS-SVD_Schema_1_0.xsd"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_CM4_SIMD.htm"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_Core.htm"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_DebugSupport.htm"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_History.htm"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_Logo_Final.jpg"/>
+			<F N="../Libraries/CMSIS/Documentation/CMSIS_System_View_Description.htm"/>
+			<F N="../MDK-ARM/hot-foot/eeprom.crf"/>
+			<F N="../MDK-ARM/hot-foot/eeprom.o"/>
+			<F N="../MDK-ARM/hot-foot/flash_eep.crf"/>
+			<F N="../MDK-ARM/hot-foot/flash_eep.o"/>
+			<F N="../Libraries/CMSIS/index.htm"/>
+			<F N="../MDK-ARM/JLinkLog.txt"/>
+			<F N="../MDK-ARM/JLinkSettings.ini"/>
+			<F N="lift_protec.vpj"/>
+			<F N="../MDK-ARM/Lift_Protec.vpj"/>
+			<F N="lift_protec.vpw"/>
+			<F N="../MDK-ARM/Lift_Protec.vpw"/>
+			<F N="lift_protec.vpwhist"/>
+			<F N="../MDK-ARM/Lift_Protec.vpwhist"/>
+			<F N="../MDK-ARM/Lift_Protec.vtg"/>
+			<F N="../MDK-ARM/hot-foot/main.__i"/>
+			<F N="../MDK-ARM/hot-foot/main.crf"/>
+			<F N="../MDK-ARM/hot-foot/main.o"/>
+			<F N="../MDK-ARM/Project.uvgui.Administrator"/>
+			<F N="../MDK-ARM/Project.uvgui.Compaq"/>
+			<F N="../MDK-ARM/Project.uvgui_Administrator.bak"/>
+			<F N="../MDK-ARM/Project.uvgui_Compaq.bak"/>
+			<F N="../MDK-ARM/Project.uvopt"/>
+			<F N="../MDK-ARM/Project.uvproj"/>
+			<F N="../MDK-ARM/Project_hot-foot.dep"/>
+			<F N="../MDK-ARM/Project_STM320518-EVAL.dep"/>
+			<F N="../MDK-ARM/Project_uvopt.bak"/>
+			<F N="../MDK-ARM/Project_uvproj.bak"/>
+			<F N="readme.txt"/>
+			<F N="../MDK-ARM/readme.txt"/>
+			<F N="../MDK-ARM/hot-foot/startup_stm32f0xx.lst"/>
+			<F N="../MDK-ARM/hot-foot/startup_stm32f0xx.o"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.axf"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.hex"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.htm"/>
+			<F N="../lib/STM32f051.lib"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.lnp"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.map"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.plg"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.sct"/>
+			<F N="../MDK-ARM/hot-foot/STM32f051.tra"/>
+			<F N="../MDK-ARM/hot-foot/stm32f0xx_it.crf"/>
+			<F N="../MDK-ARM/hot-foot/stm32f0xx_it.o"/>
+			<F N="../MDK-ARM/hot-foot/system_stm32f0xx.crf"/>
+			<F N="../MDK-ARM/hot-foot/system_stm32f0xx.o"/>
+			<F N="../MDK-ARM/hot-foot/tm1640.__i"/>
+			<F N="../MDK-ARM/hot-foot/tm1640.crf"/>
+			<F N="../MDK-ARM/hot-foot/tm1640.o"/>
+		</Folder>
+	</Files>
+</Project>

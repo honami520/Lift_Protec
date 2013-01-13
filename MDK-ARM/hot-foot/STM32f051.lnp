@@ -1,0 +1,4 @@
+--cpu Cortex-M0 ".\hot-foot\eeprom.o" ".\hot-foot\flash_eep.o" ".\hot-foot\main.o" ".\hot-foot\stm32f0xx_it.o" ".\hot-foot\system_stm32f0xx.o" ".\hot-foot\tm1640.o" ".\hot-foot\crc16.o" ".\hot-foot\uart.o" ".\hot-foot\led.o" ".\hot-foot\mma8451.o" ".\hot-foot\misc.o" ".\hot-foot\startup_stm32f0xx.o" F:\lift_protec\lib\STM32f051.lib --library_type=microlib --strict --scatter ".\hot-foot\STM32f051.sct" 
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\hot-foot\STM32f051.map" -o ".\hot-foot\STM32f051.axf"
