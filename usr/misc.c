@@ -56,6 +56,10 @@ extern uint8_t x_s, y_s, z_s;
 extern uint16_t mod_buf[MODBUS_SIZE];
 extern uint8_t led_buf[8];
 
+extern uint8_t floor_state_in;
+extern uint8_t floor_state_out;
+extern uint8_t floor_state_flag;
+
 
 
 void addr_init(void)
@@ -69,6 +73,7 @@ void input_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
     EXTI_InitTypeDef EXTI_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC, ENABLE);
 
@@ -107,7 +112,7 @@ void input_init(void)
 
     /* Configure EXTI15 line */
     EXTI_InitStructure.EXTI_Line = EXTI_Line15;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_Init(&EXTI_InitStructure);
 
     /* Enable and set EXTI4_15 Interrupt */
@@ -673,14 +678,117 @@ void err_yxcs_handle(void)
 
 }
 
+//楼层增加或者减少函数，中断中运行
+void floor_state_handle(void)
+{
+    if(floor_base_flag == 1)
+    {
+        if(floor_state_flag == 1)
+        {
+            //判断楼层进入
+            floor_state_flag = 0;
+
+            if((UP_READ() == 1) && (DOWN_READ() == 0) && (floor_state_out == DIR_UP))
+            {
+                //向上一个楼层
+                floor_now ++;
+
+                if(floor_now > 0)
+                {
+                    if(floor_now > mod_buf_read8(PS_FL_UP))
+                    {
+                        floor_now = mod_buf_read8(PS_FL_UP);
+                    }
+                }
+
+                if(floor_now == 0)
+                {
+                    floor_now = 1;
+                }
+
+                if(floor_now >= 0)
+                {
+                    mod_buf_write8(PS_FL_DAT, floor_now);
+                }
+                else
+                {
+                    mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
+                }
+
+                floor_step = 0;
+
+                //清除冲顶
+                mod_buf[PS_FL_ERR] &= ~B_CD;
+            }
+            else if((UP_READ() == 0) && (DOWN_READ() == 1) && (floor_state_out == DIR_DOWN))
+            {
+                //向下一个楼层
+                if(floor_now > 0)
+                {
+                    floor_now --;
+                }
+                else if(floor_now < 0)
+                {
+                    //负层
+                    if((-floor_now) < mod_buf_read8(PS_FL_DOWN))
+                    {
+                        floor_now --;
+                    }
+                }
+
+                if(floor_now == 0)
+                {
+                    //忽略0层
+                    if(mod_buf_read8(PS_FL_DOWN) == 0)
+                    {
+                        //无负层的时候，最小层为1层
+                        floor_now = 1;
+                    }
+                    else
+                    {
+                        //有负层的时候，可以为负层
+                        floor_now = -1;
+                    }
+                }
+
+                if(floor_now >= 0)
+                {
+                    mod_buf_write8(PS_FL_DAT, floor_now);
+                }
+                else
+                {
+                    mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
+                }
 
 
+                floor_step = 0;
 
-//1ms判断一次
+                //清除蹲低
+                mod_buf[PS_FL_ERR] &= ~B_DD;
+            }
+        }
+        else if(floor_state_flag == 0)
+        {
+            //判断楼层退出方向
+            if((UP_READ() == 0) && (DOWN_READ() == 1))
+            {
+                //朝上运行
+                floor_state_out = DIR_UP;
+            }
+            else if((UP_READ() == 1) && (DOWN_READ() == 0))
+            {
+                //朝下运行
+                floor_state_out = DIR_DOWN;
+            }
+
+        }
+    }
+}
+
+
+//运行方向，以及冲顶、蹲低判断
 void err_cd_dd_handle(void)
 {
-    static uint16_t tmp = 0;
-    
     if(floor_base_flag == 1)
     {
         //已知基础楼层下，判断冲顶
@@ -702,15 +810,11 @@ void err_cd_dd_handle(void)
             if((UP_READ() == 0) && (DOWN_READ() == 1))
             {
                 //朝上运行
-                floor_step = 2;
+                floor_step = 0;
 
                 mod_buf[PS_FL_STATE / 2] |= B_DT_UP;
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_DOWN);
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_PING);
-
-                //LED
-                led_buf[LED_BASE] = 0;
-
 
                 //冲顶判断
                 if(floor_now > 0)
@@ -725,15 +829,11 @@ void err_cd_dd_handle(void)
             else if((UP_READ() == 1) && (DOWN_READ() == 0))
             {
                 //朝下运行
-                floor_step = 3;
+                floor_step = 0;
 
                 mod_buf[PS_FL_STATE / 2] |= B_DT_DOWN;
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_UP);
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_PING);
-
-                //LED
-                led_buf[LED_BASE] = 0;
-
 
                 //蹲低判断
                 if(floor_now < 0)
@@ -744,156 +844,18 @@ void err_cd_dd_handle(void)
                         mod_buf[PS_FL_ERR] |= B_DD;
                     }
                 }
-            }
-        }
-        else if(floor_step == 2)
-        {
-            //等待移出楼层
-            if((UP_READ() == 0) && (DOWN_READ() == 0))
-            {
-                //进入等待上先平有，下平无
-                tmp ++;
-
-                if(tmp > 2)
-                {
-                    tmp = 0;
-                    floor_step = 4;
-                }
-            }
-            else
-            {
-                tmp = 0;
-            }
-        }
-        else if(floor_step == 3)
-        {
-            //等待移出楼层
-            if((UP_READ() == 0) && (DOWN_READ() == 0))
-            {
-                //进入等待上先平有，下平无
-                tmp ++;
-
-                if(tmp > 2)
-                {
-                    tmp = 0;
-                    floor_step = 6;
-                }
-            }   
-            else
-            {
-                tmp = 0;
-            }
-        }
-        else if(floor_step == 4)
-        {
-            //等待上平有，下平无出现，否则退出
-            if((UP_READ() == 1) && (DOWN_READ() == 0))
-            {
-                //楼层等待增加
-                floor_step = 5;
-            }
-            else if((UP_READ() == 0) && (DOWN_READ() == 1))
-            {
-                floor_step = 0;
-            }
-        }
-        else if(floor_step == 5)
-        {
-            //等待平层出现
-            if((UP_READ() == 1) && (DOWN_READ() == 1))
-            {
-                //平层，楼层增加
-                floor_now ++;
-
-                if(floor_now > 0)
-                {
-                    if(floor_now > mod_buf_read8(PS_FL_UP))
-                    {
-                        floor_now = mod_buf_read8(PS_FL_UP);
-                    }               
-                }
-
-
-                if(floor_now == 0)
-                {
-                    floor_now = 1;
-                }
-
-                if(floor_now >= 0)
-                {
-                    mod_buf_write8(PS_FL_DAT, floor_now);
-                }
                 else
                 {
-                    mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
-                }
-
-                floor_step = 0;
-
-                //清除冲顶
-                mod_buf[PS_FL_ERR] &= ~B_CD;
-            }
-            else if((UP_READ() == 0) && (DOWN_READ() == 0))
-            {
-                floor_step = 0;
-            }
-        }
-        else if(floor_step == 6)
-        {
-            //等待上平无，下平有出现，否则退出
-            if((UP_READ() == 0) && (DOWN_READ() == 1))
-            {
-                //楼层等待减少
-                floor_step = 7;
-            }
-            else if((UP_READ() == 1) && (DOWN_READ() == 0))
-            {
-                floor_step = 0;
-            }
-        }
-        else if(floor_step == 7)
-        {
-            //等待平层
-            if((UP_READ() == 1) && (DOWN_READ() == 1))
-            {
-                //平层，楼层减小
-                if(floor_now > 0)
-                {
-                    floor_now --;
-                }
-                else if(floor_now < 0)
-                {
-                    //负层
-                    if((-floor_now) < mod_buf_read8(PS_FL_DOWN))
+                    if(mod_buf_read8(PS_FL_DOWN) == 0)
                     {
-                        floor_now --;
+                        //无地下层的时候，和第一层比较
+                        if(floor_now == 1)
+                        {
+                            //蹲低
+                            mod_buf[PS_FL_ERR] |= B_DD;
+                        }
                     }
                 }
-
-                if(floor_now == 0)
-                {
-                    //忽略0层
-                    floor_now = -1;
-                }
-
-                if(floor_now >= 0)
-                {
-                    mod_buf_write8(PS_FL_DAT, floor_now);
-                }
-                else
-                {
-                    mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
-                }
-
-                
-                floor_step = 0;
-
-                //清除蹲低
-                mod_buf[PS_FL_ERR] &= ~B_DD;
-            }  
-            else if((UP_READ() == 0) && (DOWN_READ() == 0))
-            {
-                floor_step = 0;
             }
         }
     }
@@ -901,48 +863,35 @@ void err_cd_dd_handle(void)
 
 
 //基层判断
-//1ms进行一次
+//PC15上升沿，下降沿，都会进入
 void err_base_handle(void)
 {
     if(floor_base_flag == 0)
     {
         if(BASE_READ() == 0)
         {
-            floor_base_num ++;
+            floor_base_flag = 1;
+        }
+    }
 
-            if(floor_base_num >= 10)
-            {
-                floor_base_flag = 1;
-                floor_now = mod_buf_read8(PS_FL_BASE);
-                floor_base_num = 0;
-            }
+    //对于基层LED状态以及楼层检测
+    if(BASE_READ() == 0)
+    {
+        led_buf[LED_BASE] = 1;
+        floor_now = mod_buf_read8(PS_FL_BASE);
+
+        if(floor_now >= 0)
+        {
+            mod_buf_write8(PS_FL_DAT, floor_now);
         }
         else
         {
-            floor_base_num = 0;
+            mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
         }
     }
     else
     {
-        //已经检测出基层后，显示基层状态灯亮灭
-        if(BASE_READ() == 0)
-        {
-            led_buf[LED_BASE] = 1;
-            floor_now = mod_buf_read8(PS_FL_BASE);
-            
-            if(floor_now >= 0)
-            {
-                mod_buf_write8(PS_FL_DAT, floor_now);
-            }
-            else
-            {
-                mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
-            }
-        }
-        else
-        {
-            led_buf[LED_BASE] = 0;
-        }
+        led_buf[LED_BASE] = 0;
     }
 }
 

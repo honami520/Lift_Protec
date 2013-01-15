@@ -115,13 +115,16 @@ uint8_t seg_back[2] = {0, 0};
 
 uint8_t led_buf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t time_lj = 0;           //累计运行时间
-uint32_t time_b = 0;			//临时运行时间，单位ms，累计到1分钟清零
-uint8_t time_b_flag = 0;		//累计运行时间启动标志
+uint32_t time_b = 0;            //临时运行时间，单位ms，累计到1分钟清零
+uint8_t time_b_flag = 0;        //累计运行时间启动标志
 uint32_t num_b = 0;             //累计开门次数
 
 uint8_t eep_wr_num = 0;         //1分钟累计
 uint8_t eep_wr_flag = 0;        //30分钟写入EEP楼层累计，开门次数
 
+uint8_t floor_state_in = 0;     //电梯进入的状态
+uint8_t floor_state_out = 0;    //电梯移出的状态
+uint8_t floor_state_flag = 0;   //电梯楼层判断
 
 //故障判断
 uint16_t pckr_num = 0;

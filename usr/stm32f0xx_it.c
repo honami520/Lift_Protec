@@ -30,6 +30,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_it.h"
 #include "uart.h"
+#include "misc.h"
+
+extern uint8_t floor_state_in;
+extern uint8_t floor_state_out;
+extern uint8_t floor_state_flag;
 
 extern uint8_t eep_wr_flag;
 extern uint8_t eep_wr_num;
@@ -102,28 +107,45 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
     static uint16_t i = 0;
+    static uint8_t j = 0;
     
     i ++;
-    time_1ms_flag = 1;
-    
+
+    if((UP_READ() == 0) && (DOWN_READ() == 0))
+    {
+        floor_state_flag = 1;
+    }
+    else
+    {
+        floor_state_flag = 0;
+    }
+
+
     if((i % 10) == 0)
+    {
+        time_1ms_flag = 1;
+    }
+
+    if((i % 100) == 0)
     {
         time_10ms_flag = 1;
     }
     
-    if((i % 100) == 0)
+    if((i % 1000) == 0)
     {
         time_100ms_flag = 1;
     }   
     
-    if((i % 1000) == 0)
+    if((i % 10000) == 0)
     {
         time_1s_flag = 1;
+        i = 0;
+        j ++;
     }
 
-    if(i == 60000)
+    if(j == 60)
     {
-        i = 0;
+        j = 0;
         eep_wr_num ++;
 
         if(eep_wr_num == 30)
@@ -159,16 +181,20 @@ void DMA1_Channel2_3_IRQHandler(void)
 
 void EXTI4_15_IRQHandler(void)
 {
+    uint8_t tf = 0;
+
     if(EXTI_GetITStatus(EXTI_Line13) != RESET)
     {
         /* Clear the EXTI line 13 pending bit */
         EXTI_ClearITPendingBit(EXTI_Line13);
+        tf = 1;
     }
 
     if(EXTI_GetITStatus(EXTI_Line14) != RESET)
     {
         /* Clear the EXTI line 14 pending bit */
         EXTI_ClearITPendingBit(EXTI_Line14);
+        tf = 1;
     }
 
     if(EXTI_GetITStatus(EXTI_Line15) != RESET)
@@ -177,8 +203,14 @@ void EXTI4_15_IRQHandler(void)
         EXTI_ClearITPendingBit(EXTI_Line15);
 
         //到达基层，将当前楼层改成基层
+        err_base_handle();          //基层判断，或者是基层对应指示灯两灭判断
     }
 
+    if(tf == 1)
+    {
+        tf = 0;
+        floor_state_handle();         //冲顶、蹲低故障判断、楼层判断
+    }
 }
 
 /******************************************************************************/

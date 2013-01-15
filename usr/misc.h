@@ -10,7 +10,8 @@
 #define HUM_READ()      ((GPIOB->IDR & GPIO_Pin_9) >> 9)
 
 
-
+#define DIR_UP      1
+#define DIR_DOWN    2
 
 
 
@@ -28,6 +29,7 @@ void err_kmzt_handle(void);
 void err_ffkgm_handle(void);
 void err_cs_handle(void);
 void err_yxcs_handle(void);
+void floor_state_handle(void);
 void err_cd_dd_handle(void);
 void err_base_handle(void);
 void hum_door_check_handle(void);

@@ -3,7 +3,7 @@
 
 void systick_init(void)
 {
-    if(SysTick_Config(SystemCoreClock / 1000))
+    if(SysTick_Config(SystemCoreClock / 10000))
     {
         while(1);
     }
@@ -42,14 +42,11 @@ int main(void)
     
     while (1)
     {
-        err_cd_dd_handle();     //冲顶、蹲低故障判断、对应的指示灯两灭判断
-
         if (time_1ms_flag == 1)
         {
             //1ms进入一次
             time_1ms_flag = 0;
 
-            err_base_handle();          //基层判断，或者是基层对应指示灯两灭判断
             uart_clear();               //串口清除函数
             yxsj_handle();              //累计时间函数
         }
@@ -90,6 +87,7 @@ int main(void)
             err_ffkgm_handle();         //反复开关门故障检测
         }
 
+        err_cd_dd_handle();             //冲顶、蹲低判断
         modbus_send();                  //MODBUS发送准备
         eep_wr_handle();                //累计开门次数、累计运行楼层写入函数
     }
