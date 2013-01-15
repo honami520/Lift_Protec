@@ -65,11 +65,11 @@ void eep_init(void)
     if(ps == PASS_WORD)
     {
         //已经有参数，则读出
-        //开门次数
+        //运行时间
         time_lj = eep_read32(REG_TIME);
         mod_buf_write32(PS_LF_TIMEH, time_lj);
 
-        //累计运行层数
+        //开门次数层数
         num_b = eep_read32(REG_NUM);
         mod_buf_write32(PS_LF_NUMH, num_b);
 
@@ -79,7 +79,7 @@ void eep_init(void)
 
         //基层、楼层平均间距
         mod_buf_write8(PS_FL_BASE, eep_read16(REG_BASE));
-        mod_buf_write8(PS_NM_LCPJJJ, eep_read16(REG_LCPJJJ));
+        mod_buf_write8(PS_NM_LCPJJJ, 10 * eep_read16(REG_LCPJJJ));
 
         //超速速度
         mod_buf_write8(PS_TM_CS, eep_read16(REG_CS));
@@ -100,11 +100,11 @@ void eep_init(void)
     else
     {
         //第一次运行，没有参数，写入
-        //累计开门次数为0
+        //运行时间为0
         time_lj = 0;
         mod_buf_write32(PS_LF_TIMEH, time_lj);
 
-        //累计运行层数为0
+        //开门次数为0
         num_b = 0;
         mod_buf_write32(PS_LF_NUMH, num_b);
 

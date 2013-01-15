@@ -48,10 +48,10 @@
 #define PS_SS_ERR       3
 #define PS_FL_DAT       4
 #define PS_NM_SPEED     5
-#define PS_LF_TIMEH     6
-#define PS_LF_TIMEL     8
-#define PS_LF_NUMH      10
-#define PS_LF_NUML      12
+#define PS_LF_NUMH      6
+#define PS_LF_NUML      8
+#define PS_LF_TIMEH     10
+#define PS_LF_TIMEL     12
 #define PS_NM_PJJSD     14
 #define PS_NM_PJZSD     15
 #define PS_NM_QDZDJSD   16

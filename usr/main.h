@@ -114,9 +114,10 @@ uint8_t seg_buf[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t seg_back[2] = {0, 0};
 
 uint8_t led_buf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-uint16_t time_b = 0;            //全局时间
 uint32_t time_lj = 0;           //累计运行时间
-uint32_t num_b = 0;             //累计单趟运行次数
+uint32_t time_b = 0;			//临时运行时间，单位ms，累计到1分钟清零
+uint8_t time_b_flag = 0;		//累计运行时间启动标志
+uint32_t num_b = 0;             //累计开门次数
 
 uint8_t eep_wr_num = 0;         //1分钟累计
 uint8_t eep_wr_flag = 0;        //30分钟写入EEP楼层累计，开门次数

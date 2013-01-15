@@ -16,11 +16,12 @@ void eep_wr_handle(void)
     if(eep_wr_flag == 1)
     {
         //系统累计开门次数写入eeprom
+        mod_buf_write32(PS_LF_NUMH, num_b);
+        eep_write32(REG_NUM, num_b);
+
+        //累计运行时间写入eeprom
         mod_buf_write32(PS_LF_TIMEH, time_lj);
         eep_write32(REG_TIME, time_lj);
-
-        //累计运行层数写入eeprom
-        eep_write32(REG_NUM, num_b);
 
         eep_wr_flag = 0;
     }
@@ -36,18 +37,21 @@ int main(void)
     led_init();         //LED初始化
     tm1640_init();
     uart_init();
-	input_init();
+    input_init();
     MMA845x_init();     //加速度传感器初始化
     
     while (1)
     {
+        err_cd_dd_handle();     //冲顶、蹲低故障判断、对应的指示灯两灭判断
+
         if (time_1ms_flag == 1)
         {
             //1ms进入一次
             time_1ms_flag = 0;
-            err_cd_dd_handle();     //冲顶、蹲低故障判断、对应的指示灯两灭判断
-            err_base_handle();      //基层判断，或者是基层对应指示灯两灭判断
-            uart_clear();           //串口清除函数
+
+            err_base_handle();          //基层判断，或者是基层对应指示灯两灭判断
+            uart_clear();               //串口清除函数
+            yxsj_handle();              //累计时间函数
         }
 
         if(time_10ms_flag == 1)
@@ -55,6 +59,7 @@ int main(void)
             //10ms进入一次
             time_10ms_flag = 0;
 
+            led_state_handle();
             led_handle();           //LED状态10ms更新一次
             err_kmzt_handle();      //开门走梯故障判断
             err_cs_handle();        //超速故障判断

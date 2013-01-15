@@ -3,8 +3,8 @@
 #include "stm32f0xx.h"
 
 
-#define DOWN_READ()     ((GPIOC->IDR & GPIO_Pin_14) >> 14)
-#define UP_READ()       ((GPIOC->IDR & GPIO_Pin_13) >> 13)
+#define DOWN_READ()     ((GPIOC->IDR & GPIO_Pin_13) >> 13)
+#define UP_READ()       ((GPIOC->IDR & GPIO_Pin_14) >> 14)
 #define BASE_READ()     ((GPIOC->IDR & GPIO_Pin_15) >> 15)
 #define DOOR_READ()     ((GPIOB->IDR & GPIO_Pin_8) >> 8)
 #define HUM_READ()      ((GPIOB->IDR & GPIO_Pin_9) >> 9)
@@ -32,8 +32,8 @@ void err_cd_dd_handle(void);
 void err_base_handle(void);
 void hum_door_check_handle(void);
 void door_num_handle(void);
-
-
+void led_state_handle(void);
+void yxsj_handle(void);
 
 
 

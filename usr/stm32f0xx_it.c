@@ -156,6 +156,31 @@ void DMA1_Channel2_3_IRQHandler(void)
     }
 }
 
+
+void EXTI4_15_IRQHandler(void)
+{
+    if(EXTI_GetITStatus(EXTI_Line13) != RESET)
+    {
+        /* Clear the EXTI line 13 pending bit */
+        EXTI_ClearITPendingBit(EXTI_Line13);
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line14) != RESET)
+    {
+        /* Clear the EXTI line 14 pending bit */
+        EXTI_ClearITPendingBit(EXTI_Line14);
+    }
+
+    if(EXTI_GetITStatus(EXTI_Line15) != RESET)
+    {
+        /* Clear the EXTI line 15 pending bit */
+        EXTI_ClearITPendingBit(EXTI_Line15);
+
+        //到达基层，将当前楼层改成基层
+    }
+
+}
+
 /******************************************************************************/
 /*                 STM32F0xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

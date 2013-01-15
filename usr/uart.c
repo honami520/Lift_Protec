@@ -262,54 +262,54 @@ void modbus_rec(uint8_t val)
                 
                     case 3:
                         //电梯累计开门次数高位，读写，操作
-                        if(mod_buf_read16(PS_LF_TIMEH) != num)
+                        if(mod_buf_read16(PS_LF_NUMH) != num)
                         {
                             //数据改变，则写入
-                            mod_buf_write16(PS_LF_TIMEH, num);
-                            time_lj = mod_buf_read32(PS_LF_TIMEH);
+                            mod_buf_write16(PS_LF_NUMH, num);
+                            num_b = mod_buf_read32(PS_LF_NUMH);
                     
                             //数据写入EEPROM
-                            eep_write32(REG_TIME, time_lj);                     
+                            eep_write32(REG_NUM, num_b);                     
                         }
 
                         break;
                 
                     case 4:
                         //电梯累计开门次数低位，读写，操作
-                        if(mod_buf_read16(PS_LF_TIMEL) != num)
-                        {
-                            //数据有改变，则写入
-                            mod_buf_write16(PS_LF_TIMEL, num);
-                            time_lj = mod_buf_read32(PS_LF_TIMEH);
-                    
-                            //数据写入EEPROM
-                            eep_write32(REG_TIME, time_lj);                     
-                        }       
-                        break;
-                
-                    case 5:
-                        //电梯累计运行层数高位，读写，操作
-                        if(mod_buf_read16(PS_LF_NUMH) != num)
-                        {
-                            //数据有改变，则写入
-                            mod_buf_write16(PS_LF_NUMH, num);
-                            num_b = mod_buf_read32(PS_LF_NUMH);
-                    
-                            //数据写入EEPROM
-                            eep_write32(REG_NUM, num_b);                            
-                        }               
-                        break;
-                
-                    case 6:
-                        //电梯累计运行层数低位，读写，操作
                         if(mod_buf_read16(PS_LF_NUML) != num)
                         {
                             //数据有改变，则写入
                             mod_buf_write16(PS_LF_NUML, num);
-                            num_b = mod_buf_read32(PS_LF_NUMH);
+                            num_b = mod_buf_read32(PS_LF_NUML);
                     
                             //数据写入EEPROM
-                            eep_write32(REG_NUM, num_b);                            
+                            eep_write32(REG_NUM, num_b);                     
+                        }       
+                        break;
+                
+                    case 5:
+                        //电梯运行时间高位，读写，操作
+                        if(mod_buf_read16(PS_LF_TIMEH) != num)
+                        {
+                            //数据有改变，则写入
+                            mod_buf_write16(PS_LF_TIMEH, num);
+                            time_lj = mod_buf_read32(PS_LF_TIMEH);
+                    
+                            //数据写入EEPROM
+                            eep_write32(REG_TIME, time_lj);                            
+                        }               
+                        break;
+                
+                    case 6:
+                        //电梯运行时间低位，读写，操作
+                        if(mod_buf_read16(PS_LF_TIMEL) != num)
+                        {
+                            //数据有改变，则写入
+                            mod_buf_write16(PS_LF_TIMEL, num);
+                            time_lj = mod_buf_read32(PS_LF_TIMEL);
+                    
+                            //数据写入EEPROM
+                            eep_write32(REG_TIME, time_lj);                            
                         }               
                         break;      
 

@@ -3,6 +3,9 @@
 #include "uart.h"
 
 
+extern uint8_t time_b_flag;
+extern uint32_t time_b;
+
 extern uint16_t door_num;
 extern uint8_t door_flag;
 
@@ -65,6 +68,7 @@ void addr_init(void)
 void input_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
+    EXTI_InitTypeDef EXTI_InitStructure;
 
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC, ENABLE);
 
@@ -77,6 +81,40 @@ void input_init(void)
 
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    //PC13，PC14，PC15中断配置
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    /* Connect EXTI13 Line to PC13 pin */
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource13);
+
+    /* Connect EXTI14 Line to PC14 pin */
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource14);
+
+    /* Connect EXTI15 Line to PC15 pin */
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource15);
+
+    /* Configure EXTI13 line */
+    EXTI_InitStructure.EXTI_Line = EXTI_Line13;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+
+    /* Configure EXTI14 line */
+    EXTI_InitStructure.EXTI_Line = EXTI_Line14;
+    EXTI_Init(&EXTI_InitStructure);
+
+    /* Configure EXTI15 line */
+    EXTI_InitStructure.EXTI_Line = EXTI_Line15;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_Init(&EXTI_InitStructure);
+
+    /* Enable and set EXTI4_15 Interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI4_15_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 //平层困人判断
@@ -398,6 +436,9 @@ void err_kmzt_handle(void)
 //10ms检测一次
 void err_cs_handle(void)
 {
+    uint16_t tmp = 0;
+    uint16_t tmp1 = 0;
+    
     if(cs_step == 0)
     {
         //最初的时候，等待到达某一层
@@ -425,11 +466,11 @@ void err_cs_handle(void)
         
         if((UP_READ() == 1) && (DOWN_READ() == 1))
         {
-            //取得运行时间，以100ms为单位
-            cs_dat /= 10;
-
             //计算是否超速
-            if(30 > (cs_dat * mod_buf_read8(PS_TM_CS)))
+            tmp = mod_buf_read8(PS_NM_LCPJJJ);
+            tmp1 = mod_buf_read8(PS_TM_CS);
+            
+            if(((10 * tmp) / cs_dat) > tmp1)
             {
                 //超速运行
                 mod_buf[PS_FL_ERR] |= B_CS;
@@ -526,9 +567,6 @@ void err_yxcs_handle(void)
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_DOWN);
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_UP);
 
-                //LED
-                led_buf[LED_UP] = 0;
-                led_buf[LED_DOWN] = 0;
 
                 //加速度结束或者开启
                 if(cal_flag == 1)
@@ -671,8 +709,6 @@ void err_cd_dd_handle(void)
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_PING);
 
                 //LED
-                led_buf[LED_UP] = 1;
-                led_buf[LED_DOWN] = 0;
                 led_buf[LED_BASE] = 0;
 
 
@@ -696,8 +732,6 @@ void err_cd_dd_handle(void)
                 mod_buf[PS_FL_STATE / 2] &= ~(B_DT_PING);
 
                 //LED
-                led_buf[LED_UP] = 0;
-                led_buf[LED_DOWN] = 1;
                 led_buf[LED_BASE] = 0;
 
 
@@ -720,7 +754,7 @@ void err_cd_dd_handle(void)
                 //进入等待上先平有，下平无
                 tmp ++;
 
-                if(tmp > 10)
+                if(tmp > 2)
                 {
                     tmp = 0;
                     floor_step = 4;
@@ -739,7 +773,7 @@ void err_cd_dd_handle(void)
                 //进入等待上先平有，下平无
                 tmp ++;
 
-                if(tmp > 10)
+                if(tmp > 2)
                 {
                     tmp = 0;
                     floor_step = 6;
@@ -771,19 +805,13 @@ void err_cd_dd_handle(void)
                 //平层，楼层增加
                 floor_now ++;
 
-                //累计运行层数增加
-                num_b ++;
-
                 if(floor_now > 0)
                 {
                     if(floor_now > mod_buf_read8(PS_FL_UP))
                     {
                         floor_now = mod_buf_read8(PS_FL_UP);
-                        num_b --;
                     }               
                 }
-
-                mod_buf_write32(PS_LF_NUMH, num_b);
 
 
                 if(floor_now == 0)
@@ -802,12 +830,12 @@ void err_cd_dd_handle(void)
 
                 floor_step = 0;
 
-                //LED
-                led_buf[LED_UP] = 0;
-                led_buf[LED_DOWN] = 0;
-
                 //清除冲顶
                 mod_buf[PS_FL_ERR] &= ~B_CD;
+            }
+            else if((UP_READ() == 0) && (DOWN_READ() == 0))
+            {
+                floor_step = 0;
             }
         }
         else if(floor_step == 6)
@@ -828,9 +856,6 @@ void err_cd_dd_handle(void)
             //等待平层
             if((UP_READ() == 1) && (DOWN_READ() == 1))
             {
-                //累计运行层数增加
-                num_b ++;
-
                 //平层，楼层减小
                 if(floor_now > 0)
                 {
@@ -842,12 +867,9 @@ void err_cd_dd_handle(void)
                     if((-floor_now) < mod_buf_read8(PS_FL_DOWN))
                     {
                         floor_now --;
-                        num_b --;
                     }
                 }
 
-                mod_buf_write32(PS_LF_NUMH, num_b);
-                
                 if(floor_now == 0)
                 {
                     //忽略0层
@@ -866,13 +888,13 @@ void err_cd_dd_handle(void)
                 
                 floor_step = 0;
 
-                //LED
-                led_buf[LED_UP] = 0;
-                led_buf[LED_DOWN] = 0;
-
                 //清除蹲低
                 mod_buf[PS_FL_ERR] &= ~B_DD;
-            }               
+            }  
+            else if((UP_READ() == 0) && (DOWN_READ() == 0))
+            {
+                floor_step = 0;
+            }
         }
     }
 }
@@ -908,14 +930,14 @@ void err_base_handle(void)
             led_buf[LED_BASE] = 1;
             floor_now = mod_buf_read8(PS_FL_BASE);
             
-                if(floor_now >= 0)
-                {
-                    mod_buf_write8(PS_FL_DAT, floor_now);
-                }
-                else
-                {
-                    mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
-                }           
+            if(floor_now >= 0)
+            {
+                mod_buf_write8(PS_FL_DAT, floor_now);
+            }
+            else
+            {
+                mod_buf_write8(PS_FL_DAT, (0xe0 + (-floor_now)));
+            }
         }
         else
         {
@@ -1010,7 +1032,8 @@ void door_num_handle(void)
                 door_flag = 0;
 
                 //门已经打开
-                time_lj ++;
+                num_b ++;
+                mod_buf_write32(PS_LF_NUMH, num_b);
             }
         }
         else
@@ -1020,6 +1043,43 @@ void door_num_handle(void)
     }
 }
 
+//上下光电对应LED状态
+void led_state_handle(void)
+{
+    if(UP_READ() == 1)
+    {
+        led_buf[LED_UP] = 0;
+    }
+    else
+    {
+        led_buf[LED_UP] = 1;
+    }
+    
+    if(DOWN_READ() == 1)
+    {
+        led_buf[LED_DOWN] = 0;
+    }
+    else
+    {
+        led_buf[LED_DOWN] = 1;
+    }   
+}
+
+//运行时间累计函数，1ms进入一次
+void yxsj_handle(void)
+{
+    if((mod_buf[PS_FL_ERR] == 0) && (UP_READ() == 0) && (DOWN_READ() == 0))
+    {
+        time_b ++;
+        
+        if(time_b >= 60000)
+        {
+            time_b = 0;
+            time_lj ++;
+            mod_buf_write32(PS_LF_TIMEH, time_lj);
+        }
+    }
+}
 
 
 
